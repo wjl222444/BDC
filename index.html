@@ -73,11 +73,26 @@
 
         #currentWord {
             text-align: center;
+            margin: 30px 0;
+            min-height: 100px;
+        }
+
+        .word-main {
             font-size: 36px;
             font-weight: bold;
             color: #2980b9;
-            margin: 30px 0;
-            min-height: 50px;
+            margin-bottom: 10px;
+        }
+
+        .word-pos {
+            font-size: 20px;
+            color: #e67e22;
+            margin-bottom: 5px;
+        }
+
+        .word-explanation {
+            font-size: 18px;
+            color: #2c3e50;
         }
 
         .instructions {
@@ -112,7 +127,7 @@
         <h1>单词听写练习</h1>
         <textarea 
             id="wordInput" 
-            placeholder="请输入要听写的单词（用逗号或换行分隔）"
+            placeholder="请输入单词格式（每行一个）：&#13;&#10;单词 词性 中文解释&#13;&#10;示例：&#13;&#10;apple n. 苹果&#13;&#10;banana/v./香蕉&#13;&#10;hello"
         ></textarea>
         
         <div class="button-group">
@@ -132,14 +147,19 @@
             >
         </div>
 
-        <div id="currentWord"></div>
+        <div id="currentWord">
+            <div class="word-main">-</div>
+            <div class="word-pos">-</div>
+            <div class="word-explanation">-</div>
+        </div>
 
         <p class="instructions">
             使用说明：<br>
-            1. 在文本框中输入要听写的单词（用逗号或换行分隔）<br>
-            2. 设置播放间隔时间（单位：秒）<br>
-            3. 点击"开始听写"按钮开始自动朗读<br>
-            4. 点击"结束听写"按钮随时停止
+            1. 每行输入一个单词，格式：单词 词性 中文解释（可用空格/斜杠分隔）<br>
+            2. 示例：apple n. 苹果 或 banana/v./香蕉<br>
+            3. 设置播放间隔时间（建议 ≥2秒）<br>
+            4. 点击"开始听写"开始自动朗读<br>
+            5. 点击"结束听写"可随时停止
         </p>
     </div>
 
@@ -150,32 +170,40 @@
         const synth = window.speechSynthesis;
 
         function startDictation() {
-            // 获取并处理输入
             const input = document.getElementById('wordInput').value;
-            words = input.split(/[\n,]+/).map(word => word.trim()).filter(Boolean);
+            const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
             
-            if (words.length === 0) {
+            if (lines.length === 0) {
                 alert('请输入至少一个单词！');
                 return;
             }
 
-            // 获取间隔时间（秒）并转换为毫秒
+            // 解析单词信息
+            words = lines.map(line => {
+                // 支持多种分隔符：空格、斜杠、竖线、中文顿号
+                const parts = line.split(/[\/|、\s]+/).filter(part => part.trim() !== '');
+                return {
+                    word: parts[0] || '',
+                    pos: parts[1] || '',
+                    explanation: parts[2] || ''
+                }
+            });
+
+            // 获取间隔时间
             const intervalSeconds = parseFloat(document.getElementById('intervalInput').value) || 3;
             const intervalMs = intervalSeconds * 1000;
 
-            // 禁用开始按钮
+            // 有效性检查
+            if (words.some(item => !item.word)) {
+                alert('存在格式错误的单词条目，请检查输入！');
+                return;
+            }
+
             document.getElementById('startBtn').disabled = true;
-            
-            // 初始化索引
             currentIndex = 0;
             
-            // 清除之前的定时器
             if(intervalId) clearInterval(intervalId);
-            
-            // 设置新的间隔时间
             intervalId = setInterval(nextWord, intervalMs);
-            
-            // 立即朗读第一个单词
             nextWord();
         }
 
@@ -185,11 +213,14 @@
                 return;
             }
 
-            const currentWord = words[currentIndex];
-            document.getElementById('currentWord').textContent = currentWord;
-            
+            const current = words[currentIndex];
+            // 更新显示
+            document.querySelector('.word-main').textContent = current.word;
+            document.querySelector('.word-pos').textContent = current.pos || '-';
+            document.querySelector('.word-explanation').textContent = current.explanation || '-';
+
             // 朗读单词
-            const utterance = new SpeechSynthesisUtterance(currentWord);
+            const utterance = new SpeechSynthesisUtterance(current.word);
             utterance.lang = 'en-US';
             synth.speak(utterance);
 
@@ -200,7 +231,9 @@
             clearInterval(intervalId);
             synth.cancel();
             document.getElementById('startBtn').disabled = false;
-            document.getElementById('currentWord').textContent = '';
+            document.querySelector('.word-main').textContent = '-';
+            document.querySelector('.word-pos').textContent = '-';
+            document.querySelector('.word-explanation').textContent = '-';
         }
     </script>
 </body>

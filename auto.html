@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词听写练习</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --primary-color: #10a37f;
+            --text-color: rgba(255,255,255,0.9);
+            --card-bg: rgba(255,255,255,0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        /* 页眉样式 */
+        header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-back {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-back:hover {
+            opacity: 0.8;
+        }
+
+        .back-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #10a37f, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.2em;
+            background: linear-gradient(45deg, #10a37f, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #wordInput {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.02);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        #wordInput:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #startBtn {
+            background: linear-gradient(45deg, #10a37f, #2ecc71);
+            color: white;
+        }
+
+        #startBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16,163,127,0.3);
+        }
+
+        #stopBtn {
+            background: rgba(231,76,60,0.9);
+            color: white;
+        }
+
+        #stopBtn:hover {
+            background: rgba(192,57,43,0.9);
+            transform: translateY(-2px);
+        }
+
+        .speed-control {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #intervalInput {
+            width: 120px;
+            padding: 10px;
+            background: rgba(255,255,255,0.02);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-size: 16px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+
+        #intervalInput:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        #currentWord {
+            text-align: center;
+            padding: 30px;
+            margin: 30px 0;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .word-main {
+            font-size: 2.5em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .word-pos {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .word-explanation {
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+        }
+
+        .instructions {
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            line-height: 1.6;
+            margin-top: 30px;
+            font-size: 0.95em;
+        }
+
+        /* 页脚样式 */
+        footer {
+            max-width: 1200px;
+            margin: 40px auto 0;
+            padding: 30px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copyright {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9em;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-links a {
+            color: rgba(255,255,255,0.6);
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .social-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+                margin: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            #wordInput {
+                height: 120px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="mian.html" class="nav-back">
+            <svg class="back-icon" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            返回主页
+        </a>
+        <div class="logo">听读练习</div>
+    </header>
+
+    <div class="container">
+        <h1>📚 单词听写练习</h1>
+        <textarea 
+            id="wordInput" 
+            placeholder="请输入单词格式（每行一个）：&#13;&#10;单词 词性 中文解释&#13;&#10;示例：&#13;&#10;apple n. 苹果"
+        ></textarea>
+        
+        <div class="button-group">
+            <button id="startBtn">▶️ 开始听写</button>
+            <button id="stopBtn" disabled>⏹️ 结束听写</button>
+        </div>
+
+        <div class="speed-control">
+            <label>播放间隔（秒）：</label>
+            <input 
+                type="number" 
+                id="intervalInput" 
+                min="1" 
+                step="0.5" 
+                value="3"
+                required
+            >
+        </div>
+
+        <div id="currentWord">
+            <div class="word-main">-</div>
+            <div class="word-pos">-</div>
+            <div class="word-explanation">-</div>
+        </div>
+
+        <p class="instructions">
+            使用说明：<br>
+            1. 每行输入一个单词，格式：单词 词性 中文解释（可用空格/斜杠分隔）<br>
+            2. 示例：apple n. 苹果 或 banana/v./香蕉<br>
+            3. 设置播放间隔时间（建议 ≥2秒）<br>
+            4. 点击"开始听写"开始自动朗读<br>
+            5. 点击"结束听写"可随时停止
+        </p>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="copyright">
+                © 2025 更多功能，敬请期待.
+            </div>
+            <div class="social-links">
+                <a href="#" target="_blank">
+                    <svg class="social-icon" viewBox="0 0 24 24">
+                        <path d="M12 0C5.37 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.113.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="#" target="_blank">
+                    <svg class="social-icon" viewBox="0 0 24 24">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let words = [];
+        let currentIndex = 0;
+        let intervalId = null;
+        const synth = window.speechSynthesis;
+
+        document.getElementById('startBtn').addEventListener('click', startDictation);
+        document.getElementById('stopBtn').addEventListener('click', stopDictation);
+
+        function startDictation() {
+            const input = document.getElementById('wordInput').value;
+            const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
+            
+            if (lines.length === 0) {
+                alert('请输入至少一个单词！');
+                return;
+            }
+
+            words = lines.map(line => {
+                const parts = line.split(/[\/|、\s]+/).filter(part => part.trim() !== '');
+                return {
+                    word: parts[0] || '',
+                    pos: parts[1] || '',
+                    explanation: parts[2] || ''
+                }
+            });
+
+            const intervalSeconds = parseFloat(document.getElementById('intervalInput').value) || 3;
+            const intervalMs = intervalSeconds * 1000;
+
+            if (words.some(item => !item.word)) {
+                alert('存在格式错误的单词条目，请检查输入！');
+                return;
+            }
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            currentIndex = 0;
+            
+            if(intervalId) clearInterval(intervalId);
+            intervalId = setInterval(nextWord, intervalMs);
+            nextWord();
+        }
+
+        function nextWord() {
+            if (currentIndex >= words.length) {
+                stopDictation();
+                return;
+            }
+
+            const current = words[currentIndex];
+            document.querySelector('.word-main').textContent = current.word;
+            document.querySelector('.word-pos').textContent = current.pos || '-';
+            document.querySelector('.word-explanation').textContent = current.explanation || '-';
+
+            const utterance = new SpeechSynthesisUtterance(current.word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            synth.speak(utterance);
+
+            currentIndex++;
+        }
+
+        function stopDictation() {
+            clearInterval(intervalId);
+            synth.cancel();
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.querySelector('.word-main').textContent = '-';
+            document.querySelector('.word-pos').textContent = '-';
+            document.querySelector('.word-explanation').textContent = '-';
+        }
+
+        // 输入验证
+        document.getElementById('intervalInput').addEventListener('change', function() {
+            let value = parseFloat(this.value);
+            if (value < 1) this.value = 1;
+            if (value > 20) this.value = 20;
+        });
+    </script>
+</body>
+</html>
